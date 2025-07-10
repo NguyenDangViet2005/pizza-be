@@ -4,8 +4,10 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   JoinColumn,
+  OneToMany,
 } from 'typeorm'
 import { CategoryDetailEntity } from '~/entities/categoryDetail.entity'
+import { FoodSizeCrustEntity } from '~/entities/food-size-crust.entity'
 
 @Entity('food')
 export class FoodEntity {
@@ -26,4 +28,7 @@ export class FoodEntity {
   })
   @JoinColumn({ name: 'categoryDetail_id' })
   categoryDetail: CategoryDetailEntity
+
+  @OneToMany(() => FoodSizeCrustEntity, (fsc) => fsc.food)
+  foodSizeCrusts: FoodSizeCrustEntity[]
 }
