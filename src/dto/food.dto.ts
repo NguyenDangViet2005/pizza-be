@@ -1,3 +1,5 @@
+import { FoodSizeCrustDTO } from '~/dto/food-size-crust.dto'
+
 export class FoodDTO {
   id: number
 
@@ -6,4 +8,6 @@ export class FoodDTO {
   description: string
 
   image: string
+
+  options: FoodSizeCrustDTO[]
 }

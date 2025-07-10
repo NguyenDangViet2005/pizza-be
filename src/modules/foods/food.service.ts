@@ -17,7 +17,13 @@ export class FoodService {
 
   async getAllFoodByCategory(): Promise<CategoryDTO[]> {
     const categoryEntities = await this.categoryRepository.find({
-      relations: ['categoryDetails', 'categoryDetails.foods'],
+      relations: [
+        'categoryDetails',
+        'categoryDetails.foods',
+        'categoryDetails.foods.foodSizeCrusts',
+        'categoryDetails.foods.foodSizeCrusts.size',
+        'categoryDetails.foods.foodSizeCrusts.crust',
+      ],
     })
     return categoryEntities.map((category) => convertToCategoryDTO(category))
   }
