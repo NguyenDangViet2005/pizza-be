@@ -1,11 +1,19 @@
-import { FoodController } from 'src/modules/foods/food.controller'
-import { FoodService } from './food.service'
+import { FoodController } from '~/modules/foods/food.controller'
+import { FoodService } from '~/modules/foods/food.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Module } from '@nestjs/common'
-import { FoodEntity } from 'src/entities/food.entity'
+import { FoodEntity } from '~/entities/food.entity'
+import { CategoryEntity } from '~/entities/category.entity'
+import { CategoryDetailEntity } from '~/entities/categoryDetail.entity'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([FoodEntity])],
+  imports: [
+    TypeOrmModule.forFeature([
+      FoodEntity,
+      CategoryEntity,
+      CategoryDetailEntity,
+    ]),
+  ],
   controllers: [FoodController],
   providers: [FoodService],
 })
