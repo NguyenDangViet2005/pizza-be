@@ -1,1 +1,1 @@
-export const DOMAIN_FRONTEND = 'https//localhost:3000'
+export const DOMAIN_FRONTEND = 'http://localhost:3000'
