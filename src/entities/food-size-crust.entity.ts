@@ -4,10 +4,12 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm'
 import { FoodEntity } from '~/entities/food.entity'
 import { SizeEntity } from '~/entities/size.entity'
 import { CrustEntity } from '~/entities/crust.entity'
+import { ComboFoodItemOptionEntity } from '~/entities/comboFood-item-option.entity'
 
 @Entity('food_size_crust')
 export class FoodSizeCrustEntity {
