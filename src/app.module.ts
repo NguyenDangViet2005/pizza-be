@@ -1,3 +1,6 @@
+import { CategoryModule } from '~/modules/categories/category.module'
+import { CategoryService } from '~/modules/categories/category.service'
+import { CategoryController } from '~/modules/categories/category.controller'
 import { FoodModule } from '~/modules/foods/food.module'
 import { FoodController } from '~/modules/foods/food.controller'
 import { Module } from '@nestjs/common'
@@ -9,7 +12,7 @@ import { FoodEntity } from '~/entities/food.entity'
 import { typeOrmConfig } from '~/config/database.config'
 
 @Module({
-  imports: [TypeOrmModule.forRoot(typeOrmConfig), FoodModule],
+  imports: [CategoryModule, TypeOrmModule.forRoot(typeOrmConfig), FoodModule],
   controllers: [AppController],
   providers: [AppService],
 })
