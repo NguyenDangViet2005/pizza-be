@@ -1,3 +1,6 @@
+import { PromotionModule } from './modules/promotions/promotion.module'
+import { PromotionService } from './modules/promotions/promotion.service'
+import { PromotionController } from './modules/promotions/promotion.controller'
 import { ComboFoodService } from './modules/comboFoods/combofood.service'
 import { ComboFoodModule } from './modules/comboFoods/combofood.module'
 import { ComboFoodController } from './modules/comboFoods/combofood.controller'
@@ -16,6 +19,7 @@ import { typeOrmConfig } from '~/config/database.config'
 
 @Module({
   imports: [
+    PromotionModule,
     ComboFoodModule,
     CategoryModule,
     TypeOrmModule.forRoot(typeOrmConfig),
