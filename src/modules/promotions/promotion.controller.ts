@@ -2,7 +2,7 @@
 https://docs.nestjs.com/controllers#controllers
 */
 
-import { Controller, Get } from '@nestjs/common'
+import { Controller, Get, Param } from '@nestjs/common'
 import { PromotionCarouselBannerDto } from '~/dto/promotion-carousel-banner.dto'
 import { PromotionDto } from '~/dto/promotion.dto'
 import { ResponseData } from '~/global/ResponseData'
@@ -22,6 +22,13 @@ export class PromotionController {
     ResponseData<PromotionCarouselBannerDto[]>
   > {
     const res = await this.promotionService.getPromotionCarouselBanner()
+    return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, res)
+  }
+  @Get(':slug')
+  async getPromotionBySlug(
+    @Param('slug') slug: string,
+  ): Promise<ResponseData<PromotionDto>> {
+    const res = await this.promotionService.getPromotionBySlug(slug)
     return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, res)
   }
 }

@@ -49,4 +49,24 @@ export class PromotionService {
       convertToPromotionCarouselBannerDto(promotion),
     )
   }
+
+  async getPromotionBySlug(slug: string): Promise<PromotionDto> {
+    const promotion = await this.promotionRepository.findOne({
+      where: { slug },
+      relations: [
+        'combos',
+        'combos.combo_items',
+        'combos.combo_items.combo_item_options',
+        'conditions',
+      ],
+    })
+    if (!promotion) {
+      throw new Error('Promotion not found')
+    }
+    return convertPromotionEntityToDto(
+      promotion,
+      this.foodRepository,
+      this.foodSizeCrustRepository,
+    )
+  }
 }
