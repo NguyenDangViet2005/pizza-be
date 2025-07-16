@@ -1,3 +1,6 @@
+import { AuthModule } from './modules/auth/auth.module'
+import { AuthService } from './modules/auth/auth.service'
+import { AuthController } from './modules/auth/auth.controller'
 import { PromotionModule } from './modules/promotions/promotion.module'
 import { PromotionService } from './modules/promotions/promotion.service'
 import { PromotionController } from './modules/promotions/promotion.controller'
@@ -19,6 +22,7 @@ import { typeOrmConfig } from '~/config/database.config'
 
 @Module({
   imports: [
+    AuthModule,
     PromotionModule,
     ComboFoodModule,
     CategoryModule,

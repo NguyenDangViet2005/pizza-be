@@ -1,5 +1,6 @@
 export const enum HttpStatus {
   OK = 200,
+  CREATED = 201,
   ERROR = 500,
   NOT_FOUND = 404,
   UNAUTHORIZED = 401,

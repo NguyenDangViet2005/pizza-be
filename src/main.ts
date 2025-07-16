@@ -2,14 +2,22 @@ import { config } from 'dotenv'
 config()
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from '~/app.module'
-import { ValidationPipe } from './validation.pipe'
+import { ValidationPipe } from '@nestjs/common'
 import { DOMAIN_FRONTEND } from '~/utils/constants'
 
 declare const module: any
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
-  app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // Bỏ field không khai báo trong DTO
+      forbidNonWhitelisted: true, // Trả lỗi nếu có field thừa
+      transform: true, // Tự chuyển đổi kiểu dữ liệu
+      transformOptions: { enableImplicitConversion: true },
+      disableErrorMessages: false, // Cho phép trả message lỗi
+    }),
+  )
   // Mở CORS cho localhost:3000
   app.enableCors({
     origin: DOMAIN_FRONTEND,
