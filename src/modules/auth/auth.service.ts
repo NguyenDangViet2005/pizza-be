@@ -4,18 +4,22 @@ https://docs.nestjs.com/providers#services
 
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { UserEntity } from '~/entities'
+import { RefreshTokenEntity, UserEntity } from '~/entities'
 import * as bcrypt from 'bcrypt'
 import { RegisterDTO } from '~/dto/register.dto'
 import { Repository } from 'typeorm'
 import { LoginDTO } from '~/dto/login.dto'
 import { JwtService } from '@nestjs/jwt'
+import { v4 as uuidv4 } from 'uuid'
+import { RefreshTokenDTO } from '~/dto/refresh-token.dto'
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(RefreshTokenEntity)
+    private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
     private jwtService: JwtService,
   ) {}
   async register(registerData: RegisterDTO): Promise<UserEntity> {
@@ -50,8 +54,46 @@ export class AuthService {
     return { user, token }
   }
 
-  generateToken(user: UserEntity): string {
+  async refreshToken(refreshTokenData: RefreshTokenDTO): Promise<any> {
+    const { refreshToken } = refreshTokenData
+    const tokenEntity = await this.refreshTokenRepository.findOne({
+      where: { token: refreshToken },
+      relations: ['user'],
+    })
+    if (!tokenEntity) {
+      throw new BadRequestException('Refresh token không hợp lệ!')
+    }
+    if (tokenEntity.expiryDate < new Date()) {
+      throw new BadRequestException('Refresh token đã hết hạn!')
+    }
+    // Xóa refresh token cũ
+    await this.refreshTokenRepository.remove(tokenEntity)
+    const user = tokenEntity.user
+    const newToken = this.generateToken(user)
+    return { user, ...newToken }
+  }
+
+  generateToken(user: UserEntity): any {
     const payload = { email: user.email, sub: user.id }
-    return this.jwtService.sign(payload)
+    const accessToken = this.jwtService.sign(payload)
+    const refreshToken = uuidv4() // vd: "de305d54-75b4-431b-adb2-eb6b9e546014"
+    this.createRefreshToken(refreshToken, user)
+    // Lưu refresh token vào cơ sở dữ liệu
+    return {
+      accessToken,
+      refreshToken,
+    }
+  }
+
+  async createRefreshToken(
+    refreshToken: string,
+    user: UserEntity,
+  ): Promise<RefreshTokenEntity> {
+    const newRefreshToken = await this.refreshTokenRepository.create({
+      token: refreshToken,
+      user: user,
+      expiryDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
+    })
+    return this.refreshTokenRepository.save(newRefreshToken)
   }
 }

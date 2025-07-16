@@ -4,6 +4,7 @@ https://docs.nestjs.com/controllers#controllers
 
 import { Body, Controller, Get, Post } from '@nestjs/common'
 import { LoginDTO } from '~/dto/login.dto'
+import { RefreshTokenDTO } from '~/dto/refresh-token.dto'
 import { RegisterDTO } from '~/dto/register.dto'
 import { UserEntity } from '~/entities'
 import { ResponseData } from '~/global/ResponseData'
@@ -24,6 +25,14 @@ export class AuthController {
   @Post('login')
   async login(@Body() loginData: LoginDTO): Promise<ResponseData<UserEntity>> {
     const res = await this.authService.login(loginData)
+    return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, res)
+  }
+
+  @Post('refresh-token')
+  async refreshToken(
+    @Body() refreshTokenData: RefreshTokenDTO,
+  ): Promise<ResponseData<any>> {
+    const res = await this.authService.refreshToken(refreshTokenData)
     return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, res)
   }
 }
