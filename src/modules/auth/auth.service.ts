@@ -50,6 +50,8 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new BadRequestException('Mật khẩu không đúng!')
     }
+    // Xóa tất cả refresh token cũ của người dùng
+    await this.refreshTokenRepository.delete({ user: { id: user.id } })
     const token = this.generateToken(user)
     return { user, token }
   }
@@ -70,7 +72,7 @@ export class AuthService {
     await this.refreshTokenRepository.remove(tokenEntity)
     const user = tokenEntity.user
     const newToken = this.generateToken(user)
-    return { user, ...newToken }
+    return { user, newToken }
   }
 
   generateToken(user: UserEntity): any {
@@ -92,7 +94,7 @@ export class AuthService {
     const newRefreshToken = await this.refreshTokenRepository.create({
       token: refreshToken,
       user: user,
-      expiryDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
+      expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 day
     })
     return this.refreshTokenRepository.save(newRefreshToken)
   }
