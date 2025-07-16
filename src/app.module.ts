@@ -19,9 +19,26 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
 import { FoodEntity } from '~/entities/food.entity'
 import { typeOrmConfig } from '~/config/database.config'
+import { JwtModule } from '@nestjs/jwt'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
+    }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_SECRET'), //không cần inject vào AuthService khi tạo token
+        signOptions: {
+          expiresIn: config.get<string>('JWT_EXPIRES_IN'), //không cần inject vào AuthService khi tạo token
+        },
+      }),
+      global: true,
+      inject: [ConfigService], //không cần inject vào AuthService khi tạo token
+    }),
     AuthModule,
     PromotionModule,
     ComboFoodModule,
