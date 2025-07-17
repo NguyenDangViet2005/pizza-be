@@ -2,7 +2,7 @@ import { IsEmail, IsString, Matches, MinLength } from 'class-validator'
 
 export class RegisterDTO {
   @IsString()
-  @Matches(/^[a-zA-Z\s]+$/, {
+  @Matches(/^[\p{L}\s]+$/u, {
     message: 'Họ tên chỉ chứa chữ cái và khoảng trắng',
   })
   @MinLength(2, {

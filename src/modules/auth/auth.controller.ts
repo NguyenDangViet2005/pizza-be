@@ -17,13 +17,13 @@ export class AuthController {
   @Post('register')
   async register(
     @Body() RegisterData: RegisterDTO,
-  ): Promise<ResponseData<UserEntity>> {
+  ): Promise<ResponseData<boolean>> {
     const res = await this.authService.register(RegisterData)
     return new ResponseData(HttpStatus.CREATED, ResponseMessage.SUCCESS, res)
   }
 
   @Post('login')
-  async login(@Body() loginData: LoginDTO): Promise<ResponseData<UserEntity>> {
+  async login(@Body() loginData: LoginDTO): Promise<ResponseData<any>> {
     const res = await this.authService.login(loginData)
     return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, res)
   }

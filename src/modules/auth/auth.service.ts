@@ -22,20 +22,32 @@ export class AuthService {
     private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
     private jwtService: JwtService,
   ) {}
-  async register(registerData: RegisterDTO): Promise<UserEntity> {
-    const { email, password } = registerData
+  async register(registerData: RegisterDTO): Promise<boolean> {
+    const { phoneNumber, email, password } = registerData
     const existingUser = await this.userRepository.findOne({
       where: { email },
     })
-    if (existingUser) {
-      throw new BadRequestException('Người dùng này đã tồn tại!')
-    }
-    const hashedPassword = await bcrypt.hash(password, 10)
-    const user = await this.userRepository.create({
-      ...registerData,
-      password: hashedPassword,
+    const existingPhoneNumber = await this.userRepository.findOne({
+      where: { phoneNumber },
     })
-    return this.userRepository.save(user)
+    if (existingPhoneNumber) {
+      throw new BadRequestException('Số điện thoại đã được sử dụng!')
+    }
+    if (existingUser) {
+      throw new BadRequestException('Email đã được sử dụng!')
+    }
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10)
+      const user = await this.userRepository.create({
+        ...registerData,
+        password: hashedPassword,
+      })
+      await this.userRepository.save(user)
+      return true
+    } catch (error) {
+      throw new BadRequestException('Đăng ký không thành công!')
+    }
+    return false
   }
 
   async login(loginData: LoginDTO): Promise<any> {
@@ -53,7 +65,7 @@ export class AuthService {
     // Xóa tất cả refresh token cũ của người dùng
     await this.refreshTokenRepository.delete({ user: { id: user.id } })
     const token = this.generateToken(user)
-    return { user, token }
+    return { token }
   }
 
   async refreshToken(refreshTokenData: RefreshTokenDTO): Promise<any> {
@@ -72,7 +84,7 @@ export class AuthService {
     await this.refreshTokenRepository.remove(tokenEntity)
     const user = tokenEntity.user
     const newToken = this.generateToken(user)
-    return { user, newToken }
+    return { newToken }
   }
 
   generateToken(user: UserEntity): any {
