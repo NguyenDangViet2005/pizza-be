@@ -44,11 +44,10 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000,
     })
 
-    return new ResponseData(
-      HttpStatus.OK,
-      ResponseMessage.SUCCESS,
-      result.token.accessToken,
-    )
+    return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, {
+      user: result.userWithoutPassword,
+      accessToken: result.token.accessToken,
+    })
   }
 
   @Post('refresh-token')
@@ -72,10 +71,28 @@ export class AuthController {
       maxAge: 24 * 60 * 60 * 1000,
     })
 
-    return new ResponseData(
-      HttpStatus.OK,
-      ResponseMessage.SUCCESS,
-      result.newToken.accessToken,
-    )
+    return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, {
+      user: result.userWithoutPassword,
+      accessToken: result.newToken.accessToken,
+    })
+  }
+
+  @Post('logout')
+  logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): ResponseData<any> {
+    const refreshToken = req.cookies['refreshToken']
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token không tồn tại!')
+    }
+
+    // Gọi service để xóa refresh token
+    this.authService.logout(refreshToken)
+
+    // Xóa cookie refresh token
+    res.clearCookie('refreshToken')
+
+    return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, null)
   }
 }
