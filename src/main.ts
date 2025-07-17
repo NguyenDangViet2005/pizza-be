@@ -4,11 +4,13 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from '~/app.module'
 import { ValidationPipe } from '@nestjs/common'
 import { DOMAIN_FRONTEND } from '~/utils/constants'
+import cookieParser from 'cookie-parser'
 
 declare const module: any
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
+  app.use(cookieParser())
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // Bỏ field không khai báo trong DTO

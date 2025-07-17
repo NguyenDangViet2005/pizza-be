@@ -68,8 +68,7 @@ export class AuthService {
     return { token }
   }
 
-  async refreshToken(refreshTokenData: RefreshTokenDTO): Promise<any> {
-    const { refreshToken } = refreshTokenData
+  async refreshToken(refreshToken: string): Promise<any> {
     const tokenEntity = await this.refreshTokenRepository.findOne({
       where: { token: refreshToken },
       relations: ['user'],
