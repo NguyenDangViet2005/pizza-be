@@ -64,8 +64,9 @@ export class AuthService {
     }
     // Xóa tất cả refresh token cũ của người dùng
     await this.refreshTokenRepository.delete({ user: { id: user.id } })
+    const { password: _, ...userWithoutPassword } = user // _ là biến tạm để loại bỏ password khỏi đối tượng trả về, tránh bị trùng với password trong DTO
     const token = this.generateToken(user)
-    return { token }
+    return { userWithoutPassword, token }
   }
 
   async refreshToken(refreshToken: string): Promise<any> {
@@ -82,8 +83,9 @@ export class AuthService {
     // Xóa refresh token cũ
     await this.refreshTokenRepository.remove(tokenEntity)
     const user = tokenEntity.user
+    const { password: _, ...userWithoutPassword } = user
     const newToken = this.generateToken(user)
-    return { newToken }
+    return { userWithoutPassword, newToken }
   }
 
   generateToken(user: UserEntity): any {
@@ -108,5 +110,16 @@ export class AuthService {
       expiryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 day
     })
     return this.refreshTokenRepository.save(newRefreshToken)
+  }
+
+  async logout(refreshToken: string): Promise<void> {
+    const tokenEntity = await this.refreshTokenRepository.findOne({
+      where: { token: refreshToken },
+    })
+    if (!tokenEntity) {
+      throw new BadRequestException('Refresh token không hợp lệ!')
+    }
+    // Xóa refresh token khỏi cơ sở dữ liệu
+    await this.refreshTokenRepository.remove(tokenEntity)
   }
 }
