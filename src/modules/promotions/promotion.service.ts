@@ -8,7 +8,7 @@ import { Repository } from 'typeorm'
 import { PromotionCarouselBannerDto } from '~/dto/promotion-carousel-banner.dto'
 import { PromotionDto } from '~/dto/promotion.dto'
 import { FoodEntity, FoodSizeCrustEntity, PromotionEntity } from '~/entities'
-import { convertToPromotionCarouselBannerDto } from '~/mapper/promotion-carousel-banner.mapper'
+import { convertToPromotionCarouselBannerDto } from '~/mapper/promotion.mapper'
 import { convertPromotionEntityToDto } from '~/mapper/promotion.mapper'
 
 @Injectable()

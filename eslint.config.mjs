@@ -1,9 +1,9 @@
 // eslint.config.ts
 // @ts-check
-import eslint from '@eslint/js';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import globals from 'globals';
-import tseslint from 'typescript-eslint';
+import eslint from '@eslint/js'
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
+import globals from 'globals'
+import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   {
@@ -40,6 +40,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-function-type': 'off',
       '@typescript-eslint/await-thenable': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
     },
   },
-);
+)

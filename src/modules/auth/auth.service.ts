@@ -6,12 +6,12 @@ import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { RefreshTokenEntity, UserEntity } from '~/entities'
 import * as bcrypt from 'bcrypt'
-import { RegisterDTO } from '~/dto/register.dto'
 import { Repository } from 'typeorm'
-import { LoginDTO } from '~/dto/login.dto'
+import { LoginRequest } from '~/request/login.request'
 import { JwtService } from '@nestjs/jwt'
 import { v4 as uuidv4 } from 'uuid'
 import { RefreshTokenDTO } from '~/dto/refresh-token.dto'
+import { RegisterRequest } from '~/request/register.request'
 
 @Injectable()
 export class AuthService {
@@ -22,7 +22,7 @@ export class AuthService {
     private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
     private jwtService: JwtService,
   ) {}
-  async register(registerData: RegisterDTO): Promise<boolean> {
+  async register(registerData: RegisterRequest): Promise<boolean> {
     const { phoneNumber, email, password } = registerData
     const existingUser = await this.userRepository.findOne({
       where: { email },
@@ -50,7 +50,7 @@ export class AuthService {
     return false
   }
 
-  async login(loginData: LoginDTO): Promise<any> {
+  async login(loginData: LoginRequest): Promise<any> {
     const { email, password } = loginData
     const user = await this.userRepository.findOne({
       where: { email },
@@ -64,7 +64,7 @@ export class AuthService {
     }
     // Xóa tất cả refresh token cũ của người dùng
     await this.refreshTokenRepository.delete({ user: { id: user.id } })
-    const { password: _, ...userWithoutPassword } = user // _ là biến tạm để loại bỏ password khỏi đối tượng trả về, tránh bị trùng với password trong DTO
+    const { password: _, ...userWithoutPassword } = user // _ là biến tạm để loại bỏ password khỏi đối tượng trả về, tránh bị trùng với password trong Request
     const token = this.generateToken(user)
     return { userWithoutPassword, token }
   }

@@ -9,7 +9,8 @@ import {
 import { FoodEntity } from '~/entities/food.entity'
 import { SizeEntity } from '~/entities/size.entity'
 import { CrustEntity } from '~/entities/crust.entity'
-import { ComboFoodItemOptionEntity } from '~/entities/comboFood-item-option.entity'
+import { CartFoodItemEntity } from '~/entities/cart-food-item.entity'
+import { CartComboItemEntity } from '~/entities/cart-combo-item.entity'
 
 @Entity('food_size_crust')
 export class FoodSizeCrustEntity {
@@ -33,4 +34,16 @@ export class FoodSizeCrustEntity {
 
   @Column({ default: false })
   is_default: boolean
+
+  @OneToMany(
+    () => CartFoodItemEntity,
+    (cartFoodItem) => cartFoodItem.foodSizeCrust,
+  )
+  cartFoodItems: CartFoodItemEntity[]
+
+  @OneToMany(
+    () => CartComboItemEntity,
+    (cartComboItem) => cartComboItem.foodSizeCrust,
+  )
+  cartComboItems: CartComboItemEntity[]
 }

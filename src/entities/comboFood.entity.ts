@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
+import { CartComboEntity } from '~/entities/cart-combo.entity'
 import { ComboFoodItemEntity } from '~/entities/comboFood-item.entity'
 import { PromotionEntity } from '~/entities/promotion.entity'
 
@@ -30,4 +31,7 @@ export class ComboFoodEntity {
   @ManyToOne(() => PromotionEntity, (promotion) => promotion.combos)
   @JoinColumn({ name: 'promotion_id' })
   promotion: PromotionEntity
+
+  @OneToMany(() => CartComboEntity, (cartCombo) => cartCombo.comboFood)
+  cartCombos: CartComboEntity[]
 }

@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
+import { CartComboItemEntity } from '~/entities/cart-combo-item.entity'
 import { ComboFoodItemOptionEntity } from '~/entities/comboFood-item-option.entity'
 import { ComboFoodEntity } from '~/entities/comboFood.entity'
 
@@ -33,4 +34,7 @@ export class ComboFoodItemEntity {
     (option) => option.combo_item_option,
   )
   combo_item_options: ComboFoodItemOptionEntity[]
+
+  @OneToMany(() => CartComboItemEntity, (item) => item.comboItem)
+  cartComboItems: CartComboItemEntity[]
 }
