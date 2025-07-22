@@ -1,3 +1,6 @@
+import { CartModule } from './modules/cart/cart.module'
+import { CartService } from './modules/cart/cart.service'
+import { CartController } from './modules/cart/cart.controller'
 import { AuthModule } from './modules/auth/auth.module'
 import { AuthService } from './modules/auth/auth.service'
 import { AuthController } from './modules/auth/auth.controller'
@@ -45,6 +48,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
     CategoryModule,
     TypeOrmModule.forRoot(typeOrmConfig),
     FoodModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService],

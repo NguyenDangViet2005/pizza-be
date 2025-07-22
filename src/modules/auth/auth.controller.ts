@@ -11,21 +11,21 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common'
-import { LoginDTO } from '~/dto/login.dto'
+import { LoginRequest } from '~/request/login.request'
 import { RefreshTokenDTO } from '~/dto/refresh-token.dto'
-import { RegisterDTO } from '~/dto/register.dto'
 import { UserEntity } from '~/entities'
 import { ResponseData } from '~/global/ResponseData'
 import { HttpStatus, ResponseMessage } from '~/global/ResponseEnum'
 import { AuthService } from '~/modules/auth/auth.service'
 import { Response, Request } from 'express'
+import { RegisterRequest } from '~/request/register.request'
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Post('register')
   async register(
-    @Body() RegisterData: RegisterDTO,
+    @Body() RegisterData: RegisterRequest,
   ): Promise<ResponseData<boolean>> {
     const res = await this.authService.register(RegisterData)
     return new ResponseData(HttpStatus.CREATED, ResponseMessage.SUCCESS, res)
@@ -33,7 +33,7 @@ export class AuthController {
 
   @Post('login')
   async login(
-    @Body() loginData: LoginDTO,
+    @Body() loginData: LoginRequest,
     @Res({ passthrough: true }) res: Response,
   ): Promise<ResponseData<any>> {
     const result = await this.authService.login(loginData)

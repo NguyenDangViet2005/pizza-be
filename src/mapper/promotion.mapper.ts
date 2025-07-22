@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm'
+import { PromotionCarouselBannerDto } from '~/dto/promotion-carousel-banner.dto'
 import { PromotionDto } from '~/dto/promotion.dto'
 import { FoodEntity, FoodSizeCrustEntity } from '~/entities'
 import { PromotionEntity } from '~/entities/promotion.entity'
@@ -26,5 +27,17 @@ export const convertPromotionEntityToDto = async (
     is_active: promotion.is_active,
     conditions: promotion.conditions?.map((condition) => condition.name),
     combos: items,
+  }
+}
+
+export const convertToPromotionCarouselBannerDto = (
+  promotion: PromotionEntity,
+): PromotionCarouselBannerDto => {
+  return {
+    id: promotion.id,
+    name: promotion.name,
+    banner: promotion.banner,
+    slug: promotion.slug,
+    is_active: promotion.is_active,
   }
 }
