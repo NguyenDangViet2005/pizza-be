@@ -19,14 +19,8 @@ import { CartFoodItemRequest } from '~/request/cart-food-item.request'
 export const convertCartFoodRequestToEntity = async (
   request: CartFoodItemRequest,
   fscRepository: Repository<FoodSizeCrustEntity>,
-  userRepository: Repository<UserEntity>,
 ): Promise<CartFoodItemEntity> => {
-  const user = await userRepository.findOne({ where: { id: request.userId } })
-  if (!user) {
-    throw new Error('không tìm thấy người dùng')
-  }
   const foodEntity = new CartFoodItemEntity()
-  foodEntity.user_id = request.userId
   foodEntity.foodSizeCrust = await fscRepository.findOne({
     where: {
       food: { id: request.foodId },
@@ -35,6 +29,7 @@ export const convertCartFoodRequestToEntity = async (
     },
     relations: ['food', 'size', 'crust'],
   })
+  foodEntity.user_id = request.userId
   foodEntity.quantity = request.quantity
   foodEntity.note = request.note
   foodEntity.totalPrice = request.totalPrice
@@ -43,13 +38,8 @@ export const convertCartFoodRequestToEntity = async (
 
 export const convertCartComboRequestToEntity = async (
   request: CartComboRequest,
-  userRepository: Repository<UserEntity>,
   comboRepository: Repository<ComboFoodEntity>,
 ): Promise<CartComboEntity> => {
-  const user = await userRepository.findOne({ where: { id: request.userId } })
-  if (!user) {
-    throw new Error('không tìm thấy người dùng')
-  }
   const cartComboEntity = new CartComboEntity()
   cartComboEntity.user_id = request.userId
   const comboFood = await comboRepository.findOne({
@@ -58,6 +48,7 @@ export const convertCartComboRequestToEntity = async (
   if (!comboFood) {
     throw new Error('không tìm thấy combo')
   }
+  cartComboEntity.user_id = request.userId
   cartComboEntity.comboFood = comboFood
   cartComboEntity.quantity = request.quantity
   cartComboEntity.totalPrice = request.totalPrice
@@ -77,6 +68,7 @@ export const convertCartComboItemRequestToEntity = async (
   if (!comboItemEntity) {
     throw new Error('không tìm thấy combo item')
   }
+  cartComboItemEntity.comboItem = comboItemEntity
   cartComboItemEntity.cartCombo = cartComboEntity
   cartComboItemEntity.foodSizeCrust = await fscRepository.findOne({
     where: {

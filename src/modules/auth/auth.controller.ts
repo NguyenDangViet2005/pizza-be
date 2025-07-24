@@ -19,10 +19,14 @@ import { HttpStatus, ResponseMessage } from '~/global/ResponseEnum'
 import { AuthService } from '~/modules/auth/auth.service'
 import { Response, Request } from 'express'
 import { RegisterRequest } from '~/request/register.request'
+import { JwtService } from '@nestjs/jwt'
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
+  ) {}
   @Post('register')
   async register(
     @Body() RegisterData: RegisterRequest,
@@ -43,6 +47,12 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000,
     })
+    res.cookie('accessToken', result.token.accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 30 * 60 * 1000,
+    })
 
     return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, {
       user: result.userWithoutPassword,
@@ -56,9 +66,13 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<ResponseData<any>> {
     const refreshToken = req.cookies['refreshToken']
+    const accessToken = req.cookies['accessToken']
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token không tồn tại!')
     }
+
+    // Gọi service để kiểm tra accessToken có được phép refresh không
+    this.authService.checkAccessTokenShouldRefresh(accessToken)
 
     // Gọi service để kiểm tra & cấp token mới
     const result = await this.authService.refreshToken(refreshToken)
@@ -69,6 +83,12 @@ export class AuthController {
       secure: false,
       sameSite: 'lax',
       maxAge: 24 * 60 * 60 * 1000,
+    })
+    res.cookie('accessToken', result.newToken.accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 30 * 60 * 60 * 1000,
     })
 
     return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, {
@@ -90,9 +110,34 @@ export class AuthController {
     // Gọi service để xóa refresh token
     this.authService.logout(refreshToken)
 
-    // Xóa cookie refresh token
+    // Xóa cookie refresh token và access token
     res.clearCookie('refreshToken')
+    res.clearCookie('accessToken')
 
     return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, null)
+  }
+
+  @Get('user-from-token')
+  async getUserFromToken(@Req() req: Request): Promise<ResponseData<any>> {
+    const accessToken = req.cookies['accessToken']
+    if (!accessToken) {
+      throw new UnauthorizedException('Access token không tồn tại!')
+    }
+    try {
+      const payload = this.jwtService.verify(accessToken)
+      // Lấy user từ payload (sub là userId)
+      const user = await this.authService.getUserById(payload.sub)
+      if (!user) {
+        throw new UnauthorizedException('User không tồn tại!')
+      }
+      const { password, ...userWithoutPassword } = user
+      return new ResponseData(
+        HttpStatus.OK,
+        ResponseMessage.SUCCESS,
+        userWithoutPassword,
+      )
+    } catch (e) {
+      throw new UnauthorizedException('Access token không hợp lệ!')
+    }
   }
 }

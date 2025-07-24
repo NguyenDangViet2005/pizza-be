@@ -15,7 +15,10 @@ import {
   CartFoodItemEntity,
   ComboFoodEntity,
   ComboFoodItemEntity,
+  RefreshTokenEntity,
 } from '~/entities'
+import { AuthModule } from '~/modules/auth/auth.module'
+import { AuthService } from '~/modules/auth/auth.service'
 
 @Module({
   imports: [
@@ -24,12 +27,14 @@ import {
       FoodSizeCrustEntity,
       CartComboEntity,
       CartComboItemEntity,
-      UserEntity,
       ComboFoodEntity,
       ComboFoodItemEntity,
+      UserEntity,
+      RefreshTokenEntity,
     ]),
+    AuthModule,
   ],
   controllers: [CartController],
-  providers: [CartService],
+  providers: [CartService, AuthService],
 })
 export class CartModule {}

@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt'
 import { v4 as uuidv4 } from 'uuid'
 import { RefreshTokenDTO } from '~/dto/refresh-token.dto'
 import { RegisterRequest } from '~/request/register.request'
+import * as jwt from 'jsonwebtoken'
 
 @Injectable()
 export class AuthService {
@@ -121,5 +122,29 @@ export class AuthService {
     }
     // Xóa refresh token khỏi cơ sở dữ liệu
     await this.refreshTokenRepository.remove(tokenEntity)
+  }
+
+  async getUserById(userId: number): Promise<UserEntity | null> {
+    return this.userRepository.findOne({ where: { id: userId } })
+  }
+
+  checkAccessTokenShouldRefresh(accessToken: string): void {
+    if (!accessToken) {
+      throw new BadRequestException('Access token không tồn tại!')
+    }
+    let decoded: any
+    try {
+      decoded = jwt.decode(accessToken)
+    } catch (e) {
+      throw new BadRequestException('Access token không hợp lệ!')
+    }
+    if (!decoded || !decoded.exp) {
+      throw new BadRequestException('Access token không hợp lệ!')
+    }
+    const now = Math.floor(Date.now() / 1000)
+    const timeLeft = decoded.exp - now
+    if (timeLeft > 5 * 60) {
+      throw new BadRequestException('Access token chưa cần refresh!')
+    }
   }
 }

@@ -37,8 +37,6 @@ export class CartService {
     private readonly cartComboRepository: Repository<CartComboEntity>,
     @InjectRepository(CartComboItemEntity)
     private readonly cartComboItemRepository: Repository<CartComboItemEntity>,
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(ComboFoodItemEntity)
     private readonly comboItemRepository: Repository<ComboFoodItemEntity>,
     @InjectRepository(ComboFoodEntity)
@@ -49,7 +47,6 @@ export class CartService {
       const cartFoodItem = await convertCartFoodRequestToEntity(
         cartFoodRequest,
         this.foodSizeCrustRepository,
-        this.userRepository,
       )
       await this.cartFoodItemRepository.save(cartFoodItem)
       return true
@@ -62,7 +59,6 @@ export class CartService {
     try {
       const cartComboEntity = await convertCartComboRequestToEntity(
         cartComboDTO,
-        this.userRepository,
         this.comboRepository,
       )
       const savedCombo = await this.cartComboRepository.save(cartComboEntity)
@@ -80,14 +76,10 @@ export class CartService {
       return false
     }
   }
-  async getCart(userId: number): Promise<any> {
-    const user = await this.userRepository.findOne({ where: { id: userId } })
-    if (!user) {
-      throw new Error('User không tồn tại')
-    }
+  async getCart(user: UserEntity): Promise<any> {
     try {
       const cartFoodItems = await this.cartFoodItemRepository.find({
-        where: { user_id: userId },
+        where: { user_id: user.id },
         relations: [
           'foodSizeCrust',
           'foodSizeCrust.food',
@@ -96,7 +88,7 @@ export class CartService {
         ],
       })
       const cartCombos = await this.cartComboRepository.find({
-        where: { user_id: userId },
+        where: { user_id: user.id },
         relations: [
           'comboFood',
           'cartComboItems',
@@ -114,7 +106,7 @@ export class CartService {
         convertCartComboEntityToDTO(combo),
       )
       return {
-        userId,
+        userId: user.id,
         foods,
         combos,
       }
