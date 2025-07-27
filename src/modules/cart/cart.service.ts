@@ -114,4 +114,38 @@ export class CartService {
       throw new Error(error.message)
     }
   }
+  async deleteItemCart(id: string): Promise<boolean> {
+    if (id.startsWith('food-')) {
+      const idNumber = parseInt(id.split('-')[1])
+      try {
+        const cartFoodItem = await this.cartFoodItemRepository.findOne({
+          where: { id: idNumber },
+        })
+        if (!cartFoodItem) {
+          throw new Error('Item không tồn tại!')
+        }
+        await this.cartFoodItemRepository.delete(cartFoodItem.id)
+        return true
+      } catch (error) {
+        throw new Error(error.message)
+      }
+    } else if (id.startsWith('combo-')) {
+      const idNumber = parseInt(id.split('-')[1])
+      try {
+        const cartCombo = await this.cartComboRepository.findOne({
+          where: { id: idNumber },
+        })
+        if (!cartCombo) {
+          throw new Error('Combo không tồn tại!')
+        }
+        await this.cartComboItemRepository.delete({
+          cartCombo: { id: cartCombo.id },
+        })
+        await this.cartComboRepository.delete(cartCombo.id)
+        return true
+      } catch (error) {
+        throw new Error(error.message)
+      }
+    }
+  }
 }

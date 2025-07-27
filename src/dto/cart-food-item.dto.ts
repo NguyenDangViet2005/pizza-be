@@ -1,4 +1,6 @@
 export class CartFoodItemDTO {
+  id: string
+
   foodName: string
 
   foodImage: string
