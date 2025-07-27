@@ -88,6 +88,7 @@ export const convertCartFoodItemEntityToDTO = (
   entity: CartFoodItemEntity,
 ): CartFoodItemDTO => {
   const dto = new CartFoodItemDTO()
+  dto.id = 'food-' + entity.id
   dto.foodName = entity.foodSizeCrust.food.name
   dto.foodImage = entity.foodSizeCrust.food.image
   dto.sizeName = entity.foodSizeCrust?.size?.name
@@ -102,6 +103,7 @@ export const convertCartComboEntityToDTO = (
   entity: CartComboEntity,
 ): CartComboDTO => {
   const dto = new CartComboDTO()
+  dto.id = 'combo-' + entity.id
   dto.comboName = entity.comboFood.name
   dto.comboImage = entity.comboFood.image
   dto.items = entity.cartComboItems.map((item) =>

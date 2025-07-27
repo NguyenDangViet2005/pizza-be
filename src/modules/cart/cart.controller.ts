@@ -6,6 +6,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Post,
   Query,
@@ -81,6 +82,25 @@ export class CartController {
       throw new UnauthorizedException('User không tồn tại!')
     }
     const result = await this.cartService.getCart(user)
+    return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, result)
+  }
+
+  @Delete('delete-item-cart')
+  async deleteItemCart(
+    @Query('id') id: string,
+    @Req() req: Request,
+  ): Promise<ResponseData<boolean>> {
+    const accessToken = req.cookies['accessToken']
+    if (!accessToken) {
+      throw new UnauthorizedException('Access token không tồn tại!')
+    }
+    const payload = this.jwtService.verify(accessToken)
+    const userId = payload.sub
+    const user = await this.authService.getUserById(userId)
+    if (!user) {
+      throw new UnauthorizedException('User không tồn tại!')
+    }
+    const result = await this.cartService.deleteItemCart(id)
     return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, result)
   }
 }
