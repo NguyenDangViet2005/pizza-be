@@ -13,6 +13,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { RefreshTokenDTO } from '~/dto/refresh-token.dto'
 import { RegisterRequest } from '~/request/register.request'
 import * as jwt from 'jsonwebtoken'
+import { ChangePasswordRequest } from '~/request/change-password.request'
+// import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class AuthService {
@@ -22,6 +24,7 @@ export class AuthService {
     @InjectRepository(RefreshTokenEntity)
     private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
     private jwtService: JwtService,
+    // private readonly configService: ConfigService,
   ) {}
   async register(registerData: RegisterRequest): Promise<boolean> {
     const { phoneNumber, email, password } = registerData
@@ -91,7 +94,9 @@ export class AuthService {
 
   generateToken(user: UserEntity): any {
     const payload = { email: user.email, sub: user.id }
-    const accessToken = this.jwtService.sign(payload)
+    const accessToken = this.jwtService.sign(payload, {
+      // secret: this.configService.get<string>('JWT_SECRET'),
+    })
     const refreshToken = uuidv4() // vd: "de305d54-75b4-431b-adb2-eb6b9e546014"
     this.createRefreshToken(refreshToken, user)
     // Lưu refresh token vào cơ sở dữ liệu
@@ -145,6 +150,27 @@ export class AuthService {
     const timeLeft = decoded.exp - now
     if (timeLeft > 5 * 60) {
       throw new BadRequestException('Access token chưa cần refresh!')
+    }
+  }
+
+  async changePassword(
+    changePasswordRequest: ChangePasswordRequest,
+    user: UserEntity,
+  ): Promise<boolean> {
+    const { oldPassword, newPassword } = changePasswordRequest
+    // Kiểm tra mật khẩu cũ
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password)
+    if (!isPasswordValid) {
+      throw new BadRequestException('Mật khẩu cũ không đúng!')
+    }
+    // Hash mật khẩu mới
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10)
+    user.password = hashedNewPassword
+    try {
+      await this.userRepository.save(user)
+      return true
+    } catch (error) {
+      throw new BadRequestException('Đổi mật khẩu không thành công!')
     }
   }
 }

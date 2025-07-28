@@ -20,6 +20,7 @@ import { AuthService } from '~/modules/auth/auth.service'
 import { Response, Request } from 'express'
 import { RegisterRequest } from '~/request/register.request'
 import { JwtService } from '@nestjs/jwt'
+import { ChangePasswordRequest } from '~/request/change-password.request'
 
 @Controller('auth')
 export class AuthController {
@@ -54,10 +55,11 @@ export class AuthController {
       maxAge: 30 * 60 * 1000,
     })
 
-    return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, {
-      user: result.userWithoutPassword,
-      accessToken: result.token.accessToken,
-    })
+    return new ResponseData(
+      HttpStatus.OK,
+      ResponseMessage.SUCCESS,
+      result.userWithoutPassword,
+    )
   }
 
   @Post('refresh-token')
@@ -139,5 +141,28 @@ export class AuthController {
     } catch (e) {
       throw new UnauthorizedException('Access token không hợp lệ!')
     }
+  }
+
+  @Post('change-password')
+  async changePassword(
+    @Body() changePasswordRequest: ChangePasswordRequest,
+    @Req() req: Request,
+  ): Promise<ResponseData<any>> {
+    const accessToken = req.cookies['accessToken']
+    if (!accessToken) {
+      throw new UnauthorizedException('Access token không tồn tại!')
+    }
+    console.log(accessToken)
+
+    const payload = this.jwtService.verify(accessToken)
+    const user = await this.authService.getUserById(payload.sub)
+    if (!user) {
+      throw new UnauthorizedException('User không tồn tại!')
+    }
+    const res = await this.authService.changePassword(
+      changePasswordRequest,
+      user,
+    )
+    return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, res)
   }
 }
