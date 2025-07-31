@@ -5,11 +5,13 @@ import { AppModule } from '~/app.module'
 import { ValidationPipe } from '@nestjs/common'
 import { DOMAIN_FRONTEND } from '~/utils/constants'
 import cookieParser from 'cookie-parser'
+import { ConfigService } from '@nestjs/config'
 
 declare const module: any
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
+  const config = app.get(ConfigService)
   app.use(cookieParser())
   app.useGlobalPipes(
     new ValidationPipe({
@@ -25,7 +27,7 @@ async function bootstrap() {
     origin: DOMAIN_FRONTEND,
     credentials: true, // Nếu bạn dùng cookie hoặc xác thực
   })
-  await app.listen(process.env.PORT ?? 8080)
+  await app.listen(config.get<number>('PORT') ?? 8080)
 
   if (module.hot) {
     module.hot.accept()

@@ -2,7 +2,11 @@
 https://docs.nestjs.com/providers#services
 */
 
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { RefreshTokenEntity, UserEntity } from '~/entities'
 import * as bcrypt from 'bcrypt'
@@ -14,7 +18,8 @@ import { RefreshTokenDTO } from '~/dto/refresh-token.dto'
 import { RegisterRequest } from '~/request/register.request'
 import * as jwt from 'jsonwebtoken'
 import { ChangePasswordRequest } from '~/request/change-password.request'
-// import { ConfigService } from '@nestjs/config'
+import { UserInfoRequest } from '~/request/user-info.request'
+import { CloudinaryService } from '~/modules/cloudinary/cloudinary.service'
 
 @Injectable()
 export class AuthService {
@@ -23,8 +28,8 @@ export class AuthService {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(RefreshTokenEntity)
     private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
-    private jwtService: JwtService,
-    // private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
   async register(registerData: RegisterRequest): Promise<boolean> {
     const { phoneNumber, email, password } = registerData
@@ -171,6 +176,35 @@ export class AuthService {
       return true
     } catch (error) {
       throw new BadRequestException('Đổi mật khẩu không thành công!')
+    }
+  }
+
+  async changeUserInfo(
+    userInfoRequest: UserInfoRequest,
+    user: UserEntity,
+  ): Promise<boolean> {
+    const { fullname, email, phoneNumber, avatar, avatar_public_id } =
+      userInfoRequest
+
+    user.fullname = fullname
+    user.email = email
+    user.phoneNumber = phoneNumber
+
+    if (avatar && avatar_public_id) {
+      // 🧠 Nếu có avatar mới, thì xóa ảnh cũ
+      if (user.avatar_public_id) {
+        await this.cloudinaryService.deleteImage(user.avatar_public_id)
+      }
+
+      user.avatar = avatar
+      user.avatar_public_id = avatar_public_id
+    }
+
+    try {
+      await this.userRepository.save(user)
+      return true
+    } catch (e) {
+      throw new BadRequestException('Đổi thông tin tài khoản không thành công!')
     }
   }
 }
