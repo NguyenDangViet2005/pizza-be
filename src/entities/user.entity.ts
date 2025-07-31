@@ -18,6 +18,12 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 100 })
   password: string
 
+  @Column({ type: 'varchar', length: 200 })
+  avatar: string
+
+  @Column({ type: 'varchar', length: 200 })
+  avatar_public_id: string
+
   @OneToMany(() => RefreshTokenEntity, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshTokenEntity[]
 }

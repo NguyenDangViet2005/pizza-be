@@ -46,7 +46,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
     PromotionModule,
     ComboFoodModule,
     CategoryModule,
-    TypeOrmModule.forRoot(typeOrmConfig),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: typeOrmConfig,
+    }),
     FoodModule,
     CartModule,
   ],

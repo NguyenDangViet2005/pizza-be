@@ -19,6 +19,7 @@ import {
 } from '~/entities'
 import { AuthModule } from '~/modules/auth/auth.module'
 import { AuthService } from '~/modules/auth/auth.service'
+import { CloudinaryModule } from '~/modules/cloudinary/cloudinary.module'
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { AuthService } from '~/modules/auth/auth.service'
       RefreshTokenEntity,
     ]),
     AuthModule,
+    CloudinaryModule,
   ],
   controllers: [CartController],
   providers: [CartService, AuthService],

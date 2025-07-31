@@ -1,20 +1,15 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm'
-import { FoodEntity } from '~/entities/food.entity'
-import { CategoryEntity } from '~/entities/category.entity'
-import { CategoryDetailEntity } from '~/entities/categoryDetail.entity'
-import { CrustEntity } from '~/entities/crust.entity'
-import { SizeEntity } from '~/entities/size.entity'
-import { FoodSizeCrustEntity } from '~/entities/food-size-crust.entity'
 import * as Entities from '~/entities'
+import { ConfigService } from '@nestjs/config'
 
-export const typeOrmConfig: TypeOrmModuleOptions = {
+export const typeOrmConfig = (config: ConfigService): TypeOrmModuleOptions => ({
   type: 'mysql',
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT),
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: config.get<string>('DB_HOST'),
+  port: config.get<number>('DB_PORT'),
+  username: config.get<string>('DB_USERNAME'),
+  password: config.get<string>('DB_PASSWORD'),
+  database: config.get<string>('DB_NAME'),
   entities: Object.values(Entities),
   synchronize: false,
   logging: true,
-}
+})

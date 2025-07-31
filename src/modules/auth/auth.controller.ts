@@ -6,6 +6,7 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
   Req,
   Res,
@@ -21,6 +22,8 @@ import { Response, Request } from 'express'
 import { RegisterRequest } from '~/request/register.request'
 import { JwtService } from '@nestjs/jwt'
 import { ChangePasswordRequest } from '~/request/change-password.request'
+import { UserInfoRequest } from '~/request/user-info.request'
+import { request } from 'http'
 
 @Controller('auth')
 export class AuthController {
@@ -125,22 +128,19 @@ export class AuthController {
     if (!accessToken) {
       throw new UnauthorizedException('Access token không tồn tại!')
     }
-    try {
-      const payload = this.jwtService.verify(accessToken)
-      // Lấy user từ payload (sub là userId)
-      const user = await this.authService.getUserById(payload.sub)
-      if (!user) {
-        throw new UnauthorizedException('User không tồn tại!')
-      }
-      const { password, ...userWithoutPassword } = user
-      return new ResponseData(
-        HttpStatus.OK,
-        ResponseMessage.SUCCESS,
-        userWithoutPassword,
-      )
-    } catch (e) {
-      throw new UnauthorizedException('Access token không hợp lệ!')
+    console.log(accessToken)
+
+    const payload = this.jwtService.verify(accessToken)
+    const user = await this.authService.getUserById(payload.sub)
+    if (!user) {
+      throw new UnauthorizedException('User không tồn tại!')
     }
+    const { password, ...userWithoutPassword } = user
+    return new ResponseData(
+      HttpStatus.OK,
+      ResponseMessage.SUCCESS,
+      userWithoutPassword,
+    )
   }
 
   @Post('change-password')
@@ -152,7 +152,6 @@ export class AuthController {
     if (!accessToken) {
       throw new UnauthorizedException('Access token không tồn tại!')
     }
-    console.log(accessToken)
 
     const payload = this.jwtService.verify(accessToken)
     const user = await this.authService.getUserById(payload.sub)
@@ -163,6 +162,25 @@ export class AuthController {
       changePasswordRequest,
       user,
     )
+    return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, res)
+  }
+
+  @Post('change-user-info')
+  async changeUserInfo(
+    @Body() userInfoRequest: UserInfoRequest,
+    @Req() req: Request,
+  ): Promise<ResponseData<any>> {
+    const accessToken = req.cookies['accessToken']
+    if (!accessToken) {
+      throw new UnauthorizedException('Access token không tồn tại!')
+    }
+
+    const payload = this.jwtService.verify(accessToken)
+    const user = await this.authService.getUserById(payload.sub)
+    if (!user) {
+      throw new UnauthorizedException('User không tồn tại!')
+    }
+    const res = await this.authService.changeUserInfo(userInfoRequest, user)
     return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, res)
   }
 }
