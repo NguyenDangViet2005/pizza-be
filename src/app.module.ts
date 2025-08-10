@@ -1,3 +1,6 @@
+import { RestaurantAddressService } from './modules/restaurantAddress/restaurantaddress.service'
+import { RestaurantAddressModule } from './modules/restaurantAddress/restaurantaddress.module'
+import { RestaurantAddressController } from './modules/restaurantAddress/restaurantaddress.controller'
 import { CartModule } from './modules/cart/cart.module'
 import { CartService } from './modules/cart/cart.service'
 import { CartController } from './modules/cart/cart.controller'
@@ -27,6 +30,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Module({
   imports: [
+    RestaurantAddressModule,
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
