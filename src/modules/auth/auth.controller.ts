@@ -49,13 +49,13 @@ export class AuthController {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
     })
     res.cookie('accessToken', result.token.accessToken, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 30 * 60 * 1000,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
     })
 
     return new ResponseData(
@@ -87,13 +87,13 @@ export class AuthController {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
     })
     res.cookie('accessToken', result.newToken.accessToken, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 30 * 60 * 60 * 1000,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
     })
 
     return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, {
