@@ -47,7 +47,7 @@ export class AuthController {
     const result = await this.authService.login(loginData)
     res.cookie('refreshToken', result.token.refreshToken, {
       httpOnly: true,
-      secure: false,
+      secure: false, // chỉ false khi code dev (local)
       sameSite: 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000,
     })

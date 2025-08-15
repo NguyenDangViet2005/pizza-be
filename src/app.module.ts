@@ -1,3 +1,6 @@
+import { OrderModule } from './modules/order/order.module'
+import { OrderService } from './modules/order/order.service'
+import { OrderController } from './modules/order/order.controller'
 import { RestaurantAddressService } from './modules/restaurantAddress/restaurantaddress.service'
 import { RestaurantAddressModule } from './modules/restaurantAddress/restaurantaddress.module'
 import { RestaurantAddressController } from './modules/restaurantAddress/restaurantaddress.controller'
@@ -30,7 +33,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Module({
   imports: [
-    RestaurantAddressModule,
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
@@ -46,6 +48,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
       global: true,
       inject: [ConfigService], //không cần inject vào AuthService khi tạo token
     }),
+    OrderModule,
+    RestaurantAddressModule,
     AuthModule,
     PromotionModule,
     ComboFoodModule,
