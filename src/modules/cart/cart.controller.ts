@@ -72,7 +72,6 @@ export class CartController {
   @Get('get-cart')
   async getCart(@Req() req: Request): Promise<ResponseData<any>> {
     const accessToken = req.cookies['accessToken']
-    console.log('accessToken', accessToken)
     if (!accessToken) {
       throw new UnauthorizedException('Access token không tồn tại!')
     }

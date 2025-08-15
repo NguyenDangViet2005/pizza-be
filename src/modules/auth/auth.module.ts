@@ -23,5 +23,6 @@ import { CloudinaryModule } from '~/modules/cloudinary/cloudinary.module'
   ],
   controllers: [AuthController],
   providers: [AuthService],
+  exports: [AuthService],
 })
 export class AuthModule {}
