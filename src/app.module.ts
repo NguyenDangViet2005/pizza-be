@@ -1,3 +1,6 @@
+import { EmailModule } from './modules/email/email.module'
+import { EmailService } from './modules/email/email.service'
+import { EmailController } from './modules/email/email.controller'
 import { OrderModule } from './modules/order/order.module'
 import { OrderService } from './modules/order/order.service'
 import { OrderController } from './modules/order/order.controller'
@@ -33,6 +36,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Module({
   imports: [
+    EmailModule,
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,

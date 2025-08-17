@@ -20,6 +20,7 @@ import * as jwt from 'jsonwebtoken'
 import { ChangePasswordRequest } from '~/request/change-password.request'
 import { UserInfoRequest } from '~/request/user-info.request'
 import { CloudinaryService } from '~/modules/cloudinary/cloudinary.service'
+import { EmailService } from '~/modules/email/email.service'
 
 @Injectable()
 export class AuthService {
@@ -30,7 +31,9 @@ export class AuthService {
     private readonly refreshTokenRepository: Repository<RefreshTokenEntity>,
     private readonly jwtService: JwtService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly emailService: EmailService,
   ) {}
+  //đăng kí
   async register(registerData: RegisterRequest): Promise<boolean> {
     const { phoneNumber, email, password } = registerData
     const existingUser = await this.userRepository.findOne({
@@ -47,11 +50,16 @@ export class AuthService {
     }
     try {
       const hashedPassword = await bcrypt.hash(password, 10)
+      const token = this.jwtService.sign({
+        email: registerData.email,
+      })
       const user = await this.userRepository.create({
         ...registerData,
         password: hashedPassword,
+        isActive: 0,
       })
       await this.userRepository.save(user)
+      await this.emailService.sendVerificationEmail(user.email, token)
       return true
     } catch (error) {
       throw new BadRequestException('Đăng ký không thành công!')
@@ -59,6 +67,7 @@ export class AuthService {
     return false
   }
 
+  //đăng nhập
   async login(loginData: LoginRequest): Promise<any> {
     const { email, password } = loginData
     const user = await this.userRepository.findOne({
@@ -71,6 +80,9 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new BadRequestException('Mật khẩu không đúng!')
     }
+    if (user.isActive === 0) {
+      throw new BadRequestException('Tài khoản chưa được kích hoạt!')
+    }
     // Xóa tất cả refresh token cũ của người dùng
     await this.refreshTokenRepository.delete({ user: { id: user.id } })
     const { password: _, ...userWithoutPassword } = user // _ là biến tạm để loại bỏ password khỏi đối tượng trả về, tránh bị trùng với password trong Request
@@ -78,6 +90,7 @@ export class AuthService {
     return { userWithoutPassword, token }
   }
 
+  //refresh token
   async refreshToken(refreshToken: string): Promise<any> {
     const tokenEntity = await this.refreshTokenRepository.findOne({
       where: { token: refreshToken },
@@ -97,6 +110,7 @@ export class AuthService {
     return { userWithoutPassword, newToken }
   }
 
+  //tạo token
   generateToken(user: UserEntity): any {
     const payload = { email: user.email, sub: user.id }
     const accessToken = this.jwtService.sign(payload, {
@@ -111,6 +125,7 @@ export class AuthService {
     }
   }
 
+  //tạo refresh token
   async createRefreshToken(
     refreshToken: string,
     user: UserEntity,
@@ -123,6 +138,7 @@ export class AuthService {
     return this.refreshTokenRepository.save(newRefreshToken)
   }
 
+  //đăng xuẩt
   async logout(refreshToken: string): Promise<void> {
     const tokenEntity = await this.refreshTokenRepository.findOne({
       where: { token: refreshToken },
@@ -134,10 +150,12 @@ export class AuthService {
     await this.refreshTokenRepository.remove(tokenEntity)
   }
 
+  //lấy user từ id
   async getUserById(userId: number): Promise<UserEntity | null> {
     return this.userRepository.findOne({ where: { id: userId } })
   }
 
+  //kiểm tra access token còn hạn sử dụng bao lâu
   checkAccessTokenShouldRefresh(accessToken: string): void {
     if (!accessToken) {
       throw new BadRequestException('Access token không tồn tại!')
@@ -158,6 +176,7 @@ export class AuthService {
     }
   }
 
+  //thay đổi mật khẩu
   async changePassword(
     changePasswordRequest: ChangePasswordRequest,
     user: UserEntity,
@@ -179,6 +198,7 @@ export class AuthService {
     }
   }
 
+  //thay đổi thông tin user
   async changeUserInfo(
     userInfoRequest: UserInfoRequest,
     user: UserEntity,
@@ -206,5 +226,32 @@ export class AuthService {
     } catch (e) {
       throw new BadRequestException('Đổi thông tin tài khoản không thành công!')
     }
+  }
+
+  //quên mật khẩu
+  async verifyOtpAndResetPassword(
+    email: string,
+    otp: string,
+    newPassword: string,
+  ): Promise<boolean> {
+    const user = await this.userRepository.findOne({ where: { email } })
+    if (!user) throw new BadRequestException('Email không tồn tại!')
+
+    if (
+      !user.resetPasswordOtp ||
+      user.resetPasswordOtp !== otp ||
+      !user.resetPasswordExpires ||
+      user.resetPasswordExpires < new Date()
+    ) {
+      throw new BadRequestException('OTP không hợp lệ hoặc đã hết hạn!')
+      return false
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10)
+    user.resetPasswordOtp = null
+    user.resetPasswordExpires = null
+    await this.userRepository.save(user)
+
+    return true
   }
 }

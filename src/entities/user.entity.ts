@@ -25,6 +25,15 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 200 })
   avatar_public_id: string
 
+  @Column({ type: 'int', default: 0 })
+  isActive: number
+
+  @Column()
+  resetPasswordOtp: string
+
+  @Column()
+  resetPasswordExpires: Date
+
   @OneToMany(() => RefreshTokenEntity, (refreshToken) => refreshToken.user)
   refreshTokens: RefreshTokenEntity[]
 
