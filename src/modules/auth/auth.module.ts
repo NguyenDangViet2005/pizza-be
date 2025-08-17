@@ -6,11 +6,13 @@ import { AuthController } from '~/modules/auth/auth.controller'
 import { AuthService } from '~/modules/auth/auth.service'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { CloudinaryModule } from '~/modules/cloudinary/cloudinary.module'
+import { EmailModule } from '~/modules/email/email.module'
 
 @Module({
   imports: [
     ConfigModule,
     CloudinaryModule,
+    EmailModule,
     TypeOrmModule.forFeature([UserEntity, RefreshTokenEntity]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

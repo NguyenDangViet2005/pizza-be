@@ -3,6 +3,7 @@ https://docs.nestjs.com/controllers#controllers
 */
 
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -24,12 +25,14 @@ import { JwtService } from '@nestjs/jwt'
 import { ChangePasswordRequest } from '~/request/change-password.request'
 import { UserInfoRequest } from '~/request/user-info.request'
 import { request } from 'http'
+import { EmailService } from '~/modules/email/email.service'
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
   ) {}
   @Post('register')
   async register(
@@ -128,7 +131,6 @@ export class AuthController {
     if (!accessToken) {
       throw new UnauthorizedException('Access token không tồn tại!')
     }
-    console.log(accessToken)
 
     const payload = this.jwtService.verify(accessToken)
     const user = await this.authService.getUserById(payload.sub)
@@ -181,6 +183,43 @@ export class AuthController {
       throw new UnauthorizedException('User không tồn tại!')
     }
     const res = await this.authService.changeUserInfo(userInfoRequest, user)
+    return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, res)
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(
+    @Body('email') email: string,
+  ): Promise<ResponseData<any>> {
+    if (!email) throw new BadRequestException('Email là bắt buộc')
+    const res = await this.emailService.sendOtpForgotPassword(email)
+    return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, res)
+  }
+
+  // Step 2: xác minh OTP
+  @Post('verify-otp')
+  async verifyOtp(
+    @Body('email') email: string,
+    @Body('otp') otp: string,
+  ): Promise<ResponseData<any>> {
+    if (!email || !otp) throw new BadRequestException('Thiếu email hoặc OTP')
+    const res = await this.emailService.verifyOtp(email, otp)
+    return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, res)
+  }
+
+  // Step 3: đặt lại mật khẩu
+  @Post('reset-password')
+  async resetPassword(
+    @Body('email') email: string,
+    @Body('otp') otp: string,
+    @Body('newPassword') newPassword: string,
+  ): Promise<ResponseData<any>> {
+    if (!email || !otp || !newPassword)
+      throw new BadRequestException('Thiếu dữ liệu')
+    const res = await this.authService.verifyOtpAndResetPassword(
+      email,
+      otp,
+      newPassword,
+    )
     return new ResponseData(HttpStatus.OK, ResponseMessage.SUCCESS, res)
   }
 }
