@@ -1,3 +1,5 @@
+import { MomoModule } from './modules/momo/momo.module'
+import { MomoController } from './modules/momo/momo.controller'
 import { EmailModule } from './modules/email/email.module'
 import { EmailService } from './modules/email/email.service'
 import { EmailController } from './modules/email/email.controller'
@@ -36,7 +38,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Module({
   imports: [
+    MomoModule,
     EmailModule,
+    OrderModule,
+    RestaurantAddressModule,
+    AuthModule,
+    PromotionModule,
+    ComboFoodModule,
+    CategoryModule,
+    FoodModule,
+    CartModule,
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
@@ -52,19 +63,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
       global: true,
       inject: [ConfigService], //không cần inject vào AuthService khi tạo token
     }),
-    OrderModule,
-    RestaurantAddressModule,
-    AuthModule,
-    PromotionModule,
-    ComboFoodModule,
-    CategoryModule,
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: typeOrmConfig,
     }),
-    FoodModule,
-    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService],
